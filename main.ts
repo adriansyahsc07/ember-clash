@@ -7,7 +7,7 @@
 // The program writes the same bytes on every run: plain copies plus a
 // deterministic dossier, so the grader's two runs always agree.
 
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-game.ts';
@@ -21,8 +21,13 @@ function copyTree(source, target) {
 
 function handIn() {
   // Start from a clean output directory so stale files can never leak in.
-  rmSync(outputDir, { recursive: true, force: true });
+  // The grader mounts the output directory itself, so the directory must
+  // stay in place: clear its contents, never remove the directory itself
+  // (removing it fails with EACCES on the grader's read-only mount).
   mkdirSync(outputDir, { recursive: true });
+  for (const name of readdirSync(outputDir)) {
+    rmSync(join(outputDir, name), { recursive: true, force: true });
+  }
 
   copyTree(join(repoRoot, 'game'), join(outputDir, 'game'));
   mkdirSync(join(outputDir, 'screenshots'), { recursive: true });
