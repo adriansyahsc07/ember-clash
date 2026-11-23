@@ -1,0 +1,95 @@
+/* Ember Clash — felt table, ember glow, cards you can read at a glance. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: #171208 radial-gradient(1200px 700px at 50% -10%, #3a2410 0%, #171208 60%);
+  color: #f5e9d0;
+  font-family: Georgia, 'Times New Roman', serif;
+  overflow: hidden;
+}
+#app { width: 1280px; height: 800px; margin: 0 auto; position: relative; }
+
+/* ---------- shared screens ---------- */
+.screen { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; }
+.cta { font-size: 26px; letter-spacing: 4px; color: #ffc53d; margin-top: 28px; animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+body.shot-mode .cta { animation: none; }
+
+/* ---------- title ---------- */
+.title-embers { font-size: 34px; letter-spacing: 18px; color: #ffc53d; }
+.title-screen h1 { font-size: 108px; line-height: .95; letter-spacing: 10px; color: #ffdf8a; text-shadow: 0 0 34px rgba(255, 120, 40, .55), 0 4px 0 #7a2d12; margin: 12px 0 8px; }
+.tagline { font-size: 22px; font-style: italic; color: #e8d5a8; }
+.title-cards { display: flex; gap: 18px; margin: 30px 0 6px; }
+.mini-card { width: 92px; height: 130px; border-radius: 10px; background: #fff8ec; color: #222; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 30px; font-weight: bold; box-shadow: 0 8px 18px rgba(0,0,0,.5); transform: rotate(-4deg); }
+.mini-card:nth-child(2) { transform: rotate(2deg) translateY(8px); }
+.mini-card:nth-child(3) { transform: rotate(-1deg); }
+.mini-card:nth-child(4) { transform: rotate(4deg) translateY(6px); }
+.mini-card span { font-size: 44px; }
+.mini-card.flame { color: #e5484d; } .mini-card.tide { color: #3e8ef7; }
+.mini-card.leaf { color: #46a758; } .mini-card.stone { color: #6d6f78; }
+.howto { font-size: 17px; line-height: 1.65; color: #d9c9a3; }
+.keys { font-size: 15px; color: #a89878; margin-top: 18px; }
+
+/* ---------- table ---------- */
+.table { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 18px 28px 12px; }
+.table-header { display: flex; justify-content: space-between; align-items: baseline; }
+.round-label { font-size: 22px; letter-spacing: 3px; color: #ffc53d; }
+.score-line { font-size: 21px; color: #f5e9d0; }
+.hand-row { display: flex; gap: 22px; align-items: center; }
+.foe-row { margin-top: 10px; }
+.you-row { margin-top: auto; }
+.hand { display: flex; gap: 12px; }
+.life-block { width: 210px; flex-shrink: 0; }
+.life-name { font-size: 17px; letter-spacing: 2px; color: #e8d5a8; }
+.life-total { font-size: 42px; font-weight: bold; line-height: 1.05; }
+.life-total .heart { color: #ff5d73; }
+.life-bar { height: 10px; background: #3a2c17; border-radius: 5px; margin-top: 6px; overflow: hidden; }
+.life-fill { height: 100%; background: linear-gradient(90deg, #ff5d73, #ffc53d); border-radius: 5px; }
+.foe .life-fill { background: linear-gradient(90deg, #7a5cff, #3e8ef7); }
+
+/* ---------- cards ---------- */
+.card {
+  --suit: #e5484d;
+  width: 104px; height: 148px; border-radius: 12px; background: #fff8ec; color: #1c1a17;
+  position: relative; box-shadow: 0 6px 14px rgba(0,0,0,.55);
+  border: 3px solid var(--suit); cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.card:hover { transform: translateY(-12px); box-shadow: 0 14px 22px rgba(0,0,0,.6); }
+.card.selected { transform: translateY(-16px); outline: 4px solid #ffc53d; box-shadow: 0 0 0 4px rgba(255,197,61,.35), 0 16px 24px rgba(0,0,0,.6); }
+.card .corner { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; color: var(--suit); }
+.card .corner.top { top: 7px; left: 8px; }
+.card .corner.bottom { bottom: 7px; right: 8px; transform: rotate(180deg); }
+.card .num { font-size: 26px; font-weight: bold; }
+.card .glyph { font-size: 20px; }
+.card .centre { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--suit); }
+.card .big { font-size: 62px; font-weight: bold; line-height: .9; }
+.card .big-glyph { font-size: 40px; line-height: 1.1; }
+.card .suit-name { font-size: 12px; letter-spacing: 3px; margin-top: 4px; color: #5a5344; }
+.card.face-down { background: linear-gradient(135deg, #5b2333, #2b1a4d); border-color: #ffc53d; cursor: default; }
+.card.face-down:hover { transform: none; }
+.card-back { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ffc53d; font-size: 26px; gap: 6px; }
+.card-back span { font-size: 13px; letter-spacing: 3px; text-align: center; line-height: 1.5; }
+.card.played { cursor: default; width: 116px; height: 164px; }
+.card.played:hover { transform: none; }
+
+/* ---------- middle of the table ---------- */
+.mid-row { display: flex; gap: 24px; align-items: center; margin-top: 8px; flex: 1; min-height: 0; }
+.played-zone { flex: 1; display: flex; align-items: center; justify-content: center; gap: 26px; min-height: 180px; background: rgba(0,0,0,.25); border: 2px dashed rgba(255,197,61,.4); border-radius: 16px; padding: 10px; }
+.played-hint { font-size: 19px; font-style: italic; color: #cbb98d; }
+.vs { font-size: 20px; letter-spacing: 2px; color: #ffc53d; text-align: center; max-width: 130px; }
+.side-panel { width: 330px; flex-shrink: 0; }
+.mood { font-size: 17px; font-style: italic; color: #ffb3c0; margin-bottom: 8px; }
+.message { font-size: 19px; color: #ffdf8a; margin-bottom: 10px; }
+.mini-rules { font-size: 14.5px; line-height: 1.6; color: #cbb98d; border-top: 1px solid #4a3a20; padding-top: 8px; }
+.log { font-size: 13.5px; line-height: 1.55; color: #a89878; white-space: pre-line; margin-top: 8px; }
+.table-footer { text-align: center; font-size: 14px; color: #a89878; padding-top: 8px; }
+
+/* ---------- end screens ---------- */
+.end-screen h1 { font-size: 110px; letter-spacing: 12px; }
+.end-screen.win h1 { color: #ffd75e; text-shadow: 0 0 40px rgba(255,197,61,.7), 0 4px 0 #7a4d00; }
+.end-screen.loss h1 { color: #8fa3bf; text-shadow: 0 0 34px rgba(62,142,247,.5), 0 4px 0 #1c2a44; }
+.end-sub { font-size: 23px; font-style: italic; color: #e8d5a8; margin-top: 6px; }
+.final-score { font-size: 20px; letter-spacing: 2px; color: #cbb98d; margin-top: 30px; line-height: 1.7; }
+.final-numbers { font-size: 40px; font-weight: bold; color: #f5e9d0; letter-spacing: 1px; }
+.final-rounds { font-size: 16px; color: #a89878; }

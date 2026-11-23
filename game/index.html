@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ember Clash — an elemental card duel</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+import { newGame, startDuel, playCard, restart } from './src/game.js';
+import { render } from './src/render.js';
+import { shotState, readShotParam } from './src/shots.js';
+import { playClick, playDeal, playWinRound, playLoseRound, playVictory, playDefeat, toggleMute } from './src/audio.js';
+
+const app = document.getElementById('app');
+const shot = readShotParam();
+
+let state;
+if (shot) {
+  // Deterministic screenshot mode: render one fixed state, no interaction.
+  state = shotState(shot);
+  document.body.classList.add('shot-mode');
+  render(app, state, () => {});
+} else {
+  state = newGame();
+  const draw = () => render(app, state, onPlay);
+  const onPlay = (i) => {
+    if (state.screen !== 'table') return;
+    const before = state.playerLife + state.aiLife;
+    const result = playCard(state, i);
+    if (!result) return;
+    if (result.winner === 'player') playWinRound();
+    else if (result.winner === 'ai') playLoseRound();
+    else playClick();
+    if (state.screen === 'win') playVictory();
+    else if (state.screen === 'loss') playDefeat();
+    draw();
+  };
+  const start = () => {
+    if (state.screen === 'title') {
+      playDeal();
+      startDuel(state);
+      draw();
+    }
+  };
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'm' || e.key === 'M') { toggleMute(); return; }
+    if (e.key === 'r' || e.key === 'R') {
+      if (state.screen === 'win' || state.screen === 'loss') { state = restart(state); draw(); }
+      return;
+    }
+    if (state.screen === 'title') {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); start(); }
+      return;
+    }
+    if (state.screen === 'table') {
+      const n = parseInt(e.key, 10);
+      if (n >= 1 && n <= state.playerHand.length) {
+        state.selected = n - 1;
+        playClick();
+        draw();
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onPlay(state.selected);
+      } else if (e.key === 'ArrowLeft') {
+        state.selected = Math.max(0, state.selected - 1);
+        draw();
+      } else if (e.key === 'ArrowRight') {
+        state.selected = Math.min(state.playerHand.length - 1, state.selected + 1);
+        draw();
+      }
+      return;
+    }
+    if ((state.screen === 'win' || state.screen === 'loss') && (e.key === 'Enter' || e.key === ' ')) {
+      state = restart(state);
+      draw();
+    }
+  });
+  app.addEventListener('click', (e) => {
+    if (state.screen === 'title') start();
+    else if (state.screen === 'win' || state.screen === 'loss') { state = restart(state); draw(); }
+  });
+  draw();
+}
+</script>
+</body>
+</html>
